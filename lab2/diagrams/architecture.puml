@@ -1,0 +1,25 @@
+@startuml
+package "Клиентский слой (Frontend)" {
+  [Веб-клиент / Браузер] as Client
+}
+
+package "Серверный слой (Backend)" {
+  [API Gateway / Веб-сервер] as Gateway
+  [Модуль аутентификации] as Auth
+  [Модуль каталога книг] as Catalog
+  [Модуль учета выдачи] as Borrow
+}
+
+database "Слой данных (Database)" {
+  [База данных (PostgreSQL / MySQL)] as DB
+}
+
+Client --> Gateway
+Gateway --> Auth
+Gateway --> Catalog
+Gateway --> Borrow
+
+Auth --> DB
+Catalog --> DB
+Borrow --> DB
+@startuml
