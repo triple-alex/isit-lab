@@ -1,0 +1,26 @@
+@startuml
+left to right direction
+
+actor "Читатель" as reader
+actor "Библиотекарь" as librarian
+actor "Администратор" as admin
+
+rectangle "Система учета библиотечного фонда" {
+  usecase "Просмотр своих задолженностей" as UC1
+  usecase "Поиск книги в каталоге" as UC2
+  usecase "Оформление выдачи/возврата книги" as UC3
+  usecase "Формирование списка должников" as UC4
+  usecase "Управление каталогом книг" as UC5
+  usecase "Управление аккаунтами сотрудников" as UC6
+}
+
+reader --> UC1
+reader --> UC2
+
+librarian --> UC2
+librarian --> UC3
+librarian --> UC4
+librarian --> UC5
+
+admin --> UC6
+@startuml
