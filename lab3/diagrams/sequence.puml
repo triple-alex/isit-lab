@@ -1,1 +1,23 @@
+@startuml
+autonumber
+actor "Библиотекарь" as User
+participant "Frontend" as FE
+participant "API / Контроллер" as API
+participant "Сервис" as Service
+participant "Репозиторий" as Repo
+database "БД" as DB
+participant "Модуль уведомлений" as Notify
 
+User -> FE : Запрос на выдачу книги
+FE -> API : POST /api/borrows
+API -> Service : createBorrow()
+Service -> Repo : save()
+Repo -> DB : INSERT INTO borrows
+DB --> Repo : id
+Repo --> Service : данные
+Service -> Notify : Событие "Выдача оформлена"
+Notify -> Notify : Фоновая отправка Push/Email
+Service --> API : Успех
+API --> FE : 201 Created
+FE --> User : Отображение результата
+@enduml
