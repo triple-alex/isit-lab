@@ -1,1 +1,32 @@
+@startuml
+top to bottom direction
 
+actor "Читатель / Библиотекарь" as User
+
+package "Frontend" {
+  [Веб-интерфейс] as UI
+}
+
+package "Backend" {
+  [API / Контроллеры] as Controllers
+  [Бизнес-логика (Сервисы)] as Services
+  [Репозитории] as Repos
+  [Модуль уведомлений] as Notify
+}
+
+database "Database" {
+  [База данных] as DB
+}
+
+cloud "Внешние сервисы" {
+  [Email / Push] as Ext
+}
+
+User --> UI
+UI --> Controllers : HTTPS / REST
+Controllers --> Services
+Services --> Repos
+Repos --> DB
+Services --> Notify : Событие
+Notify --> Ext : Асинхронно
+@enduml
