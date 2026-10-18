@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Учёт выдач книг</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Учёт выдач книг</h1>
+    <p>Рабочая страница библиотекаря</p>
+
+    <form id="borrow-form" class="card" novalidate>
+      <h2>Оформление выдачи</h2>
+      <div class="form-fields">
+        <div>
+          <label for="book-title">Название книги</label>
+          <input id="book-title" type="text" aria-describedby="error-book" required>
+          <div class="error" id="error-book" aria-live="polite"></div>
+        </div>
+        <div>
+          <label for="reader-name">ФИО читателя</label>
+          <input id="reader-name" type="text" aria-describedby="error-reader" required>
+          <div class="error" id="error-reader" aria-live="polite"></div>
+        </div>
+        <div>
+          <label for="due-date">Вернуть до</label>
+          <input id="due-date" type="date" aria-describedby="error-date" required>
+          <div class="error" id="error-date" aria-live="polite"></div>
+        </div>
+      </div>
+      <button type="submit" class="primary">Оформить выдачу</button>
+    </form>
+
+    <h2>Список выдач</h2>
+    <div class="toolbar">
+      <select id="status-filter" aria-label="Состояние выдачи">
+        <option value="">Все состояния</option>
+        <option value="issued">На руках</option>
+        <option value="overdue">Просрочена</option>
+        <option value="returned">Возвращена</option>
+      </select>
+      <input id="search-input" type="search" aria-label="Поиск выдач" placeholder="Книга или читатель">
+      <button id="refresh-button" type="button">Загрузить с сервера</button>
+    </div>
+
+    <div id="info" class="message" role="status">Загрузка...</div>
+
+    <div class="table-wrapper">
+      <table id="borrow-table" hidden>
+        <thead>
+          <tr>
+            <th>№</th>
+            <th>Книга</th>
+            <th>Читатель</th>
+            <th>Вернуть до</th>
+            <th>Состояние</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody id="borrow-body"></tbody>
+      </table>
+    </div>
+
+    <p>Выдач на странице: <strong id="counter">0</strong></p>
+  </div>
+
+  <script src="js/mock-data.js"></script>
+  <script src="js/mock-api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
