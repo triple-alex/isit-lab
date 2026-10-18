@@ -1,23 +1,68 @@
 @startuml
 autonumber
+hide footbox
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
 actor "Библиотекарь" as User
 participant "Frontend" as FE
-participant "API / Контроллер" as API
+participant "API /\nКонтроллер" as API
+participant "Модуль\nаутентификации\nи прав" as Auth
 participant "Сервис" as Service
 participant "Репозиторий" as Repo
 database "БД" as DB
-participant "Модуль уведомлений" as Notify
+participant "Модуль\nуведомлений" as Notify
+participant "Почтовый\nсервис" as Mail
 
-User -> FE : Запрос на выдачу книги
-FE -> API : POST /api/borrows
-API -> Service : createBorrow()
-Service -> Repo : save()
-Repo -> DB : INSERT INTO borrows
-DB --> Repo : id
-Repo --> Service : данные
-Service -> Notify : Событие "Выдача оформлена"
-Notify -> Notify : Фоновая отправка Push/Email
-Service --> API : Успех
-API --> FE : 201 Created
-FE --> User : Отображение результата
+== Выдача книги: успешный сценарий ==
+
+note over User, API
+  Библиотекарь уже вошел в систему.
+end note
+
+User -> FE : Книга, читатель,\nсрок возврата
+FE -> API : POST /api/borrows\nДанные формы и cookie сессии
+API -> Auth : Проверить сессию\nи роль библиотекаря
+Auth --> API : Доступ разрешен
+API -> API : Проверить данные формы
+API -> Service : Оформить выдачу
+Service -> Repo : Получить доступное количество
+Repo -> DB : Запрос количества экземпляров
+DB --> Repo : Количество доступных экземпляров
+Repo --> Service : Количество
+Service -> Service : Проверить: количество > 0
+
+note over Service, DB
+  Если экземпляров нет,
+  выдача не оформляется.
+end note
+
+Service -> Repo : Сохранить выдачу,\nуменьшить остаток на 1
+Repo -> DB : Сохранить выдачу и уменьшить\nдоступное количество на 1
+DB --> Repo : Изменения сохранены
+Repo --> Service : Данные выдачи
+Service --> API : Данные выдачи
+API --> FE : Выдача оформлена и данные выдачи
+FE --> User : Выдача оформлена
+
+== Независимый запуск по расписанию: раз в сутки ==
+
+note over Notify, Mail
+  Рассылка выполняется в отдельном фоновом процессе.
+  Запрос выдачи не ожидает ее завершения.
+end note
+
+Notify <-] : Запуск раз в сутки\n(планировщик сервера)
+Notify -> Service : Найти выдачи для напоминаний
+Service -> Repo : Получить незакрытые выдачи:\nсрок завтра или уже прошел
+Repo -> DB : Запрос выдач, книг и почты читателей
+DB --> Repo : Данные
+Repo --> Service : Список выдач
+Service --> Notify : Список выдач
+
+loop Для каждой выдачи с указанной почтой
+  Notify -> Notify : Подготовить письмо:\nкнига и срок возврата
+  Notify -> Mail : Передать Email для отправки
+  Mail --> Notify : Результат отправки
+end
 @enduml

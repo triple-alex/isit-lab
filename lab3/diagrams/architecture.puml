@@ -1,7 +1,9 @@
 @startuml
 top to bottom direction
+skinparam shadowing false
+skinparam componentStyle rectangle
 
-actor "Читатель / Библиотекарь" as User
+actor "Пользователь\n(читатель, библиотекарь,\nадминистратор)" as User
 
 package "Frontend" {
   [Веб-интерфейс] as UI
@@ -9,9 +11,15 @@ package "Frontend" {
 
 package "Backend" {
   [API / Контроллеры] as Controllers
+  [Модуль аутентификации\nи прав] as Auth
   [Бизнес-логика (Сервисы)] as Services
   [Репозитории] as Repos
-  [Модуль уведомлений] as Notify
+  [Модуль уведомлений\n(фоновый процесс)] as Notify
+
+  note right of Notify
+    Планировщик сервера запускает раз в сутки.
+    Не зависит от запросов браузера.
+  end note
 }
 
 database "Database" {
@@ -19,14 +27,16 @@ database "Database" {
 }
 
 cloud "Внешние сервисы" {
-  [Email / Push] as Ext
+  [Почтовый сервис (Email)] as Ext
 }
 
 User --> UI
 UI --> Controllers : HTTPS / REST
-Controllers --> Services
-Services --> Repos
-Repos --> DB
-Services --> Notify : Событие
-Notify --> Ext : Асинхронно
+Controllers --> Auth : Проверка сессии и прав
+Auth --> Repos : Данные для входа и сессии
+Controllers --> Services : Вызов после проверки прав
+Services --> Repos : Чтение и сохранение
+Repos --> DB : SQL
+Notify --> Services : Получение выдач\nдля напоминаний
+Notify --> Ext : Отправка писем\nв фоновом процессе
 @enduml
