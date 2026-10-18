@@ -1,0 +1,28 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+hide empty description
+
+state "Вход" as Login
+state "Главная /\nличный кабинет" as Home
+state "Каталог книг" as Catalog
+state "Карточка книги" as Book
+state "Оформление выдачи" as Borrow
+
+[*] --> Login
+Login --> Home : Войти
+Home --> Catalog : Каталог
+Catalog --> Home : Главная
+Catalog --> Book : Открыть
+Book --> Catalog : Назад в каталог
+Home --> Borrow : Оформить выдачу\n(библиотекарь)
+Book --> Borrow : Оформить выдачу\n(библиотекарь)
+Borrow --> Home : Оформить / Отмена
+Home --> Login : Выход
+
+legend bottom
+  После входа на всех страницах доступны
+  пункты «Главная», «Каталог» и «Выход».
+  «Выход» возвращает к экрану входа.
+endlegend
+@enduml
