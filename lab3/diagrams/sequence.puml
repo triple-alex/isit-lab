@@ -1,0 +1,34 @@
+@startuml
+autonumber
+hide footbox
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor "Библиотекарь" as User
+participant "Интерфейс" as UI
+participant "Сервер" as Server
+database "База данных" as DB
+
+title Выдача книги: успешный сценарий
+
+User -> UI : Выбрать книгу, читателя\nи срок возврата
+UI -> Server : Запрос на выдачу\nPOST /api/borrows
+
+note over Server
+  Проверка сессии, прав
+  и данных запроса
+end note
+
+Server -> DB : Получить доступное количество книг
+DB --> Server : Количество экземпляров
+
+note over Server
+  Проверка возможности выдачи.
+  Если экземпляров нет, выдача не оформляется.
+end note
+
+Server -> DB : Сохранить выдачу и уменьшить\nдоступное количество на один
+DB --> Server : Данные сохранены
+Server --> UI : Выдача оформлена и данные выдачи
+UI --> User : Показать результат
+@enduml
